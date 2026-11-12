@@ -1,0 +1,3144 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#060e19" />
+    <meta
+      name="description"
+      content="막연한 생각에서 나만의 북극성을 발견하는, Moru 생각의 바다. 브라우저에서 작동하는 독립 프로토타입."
+    />
+    <title>Moru — 생각의 바다</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #e4e8e6;
+        --muted: #99aab4;
+        --dim: #728997;
+        --gold: #d8bf89;
+        --line: #c3d8e21c;
+        --panel: #0c1925;
+        --teal: #a4c6c4;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+          "Noto Sans KR", sans-serif;
+        font-synthesis: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #050c15;
+        color: var(--ink);
+        min-height: 100svh;
+      }
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        color: inherit;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+      button,
+      summary {
+        touch-action: manipulation;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 5px;
+      }
+      ::selection {
+        background: #a3bdb544;
+        color: white;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      button svg {
+        pointer-events: none;
+      }
+      .sky {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        touch-action: pan-y;
+      }
+      #world {
+        position: fixed;
+        inset: 0;
+        isolation: isolate;
+        overflow: hidden;
+      }
+      #world:after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at 50% 42%,
+          transparent 30%,
+          #01050d65 100%
+        );
+        z-index: 1;
+      }
+      .top {
+        position: fixed;
+        z-index: 5;
+        left: 5.3%;
+        right: 5.3%;
+        top: max(30px, env(safe-area-inset-top));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        border: 0;
+        background: none;
+        padding: 3px;
+        color: #e8e8dc;
+        text-align: left;
+        font-family: Georgia, serif;
+        font-size: 43px;
+        font-weight: 600;
+        letter-spacing: -3px;
+        line-height: 1;
+      }
+      .brand i {
+        color: #9db7b6;
+        font-style: normal;
+      }
+      .brand small {
+        font-family: inherit;
+        font-size: 9px;
+        letter-spacing: 3px;
+        display: block;
+        font-weight: 400;
+        color: #8b9fa9;
+        margin-top: 13px;
+        margin-left: 2px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+      .text-btn {
+        border: 0;
+        background: transparent;
+        color: #a9b9bf;
+        padding: 12px 4px;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+      .text-btn:hover {
+        color: var(--gold);
+      }
+      .round {
+        border: 1px solid #b4c6d025;
+        background: #12223065;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+      }
+      .round:hover {
+        background: #21364685;
+      }
+      .icon {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+      .intro {
+        position: absolute;
+        z-index: 2;
+        left: 11.5%;
+        top: 25%;
+        pointer-events: none;
+        transition: opacity 1.5s;
+      }
+      .intro .overline {
+        color: #99b3c0;
+        font: 10px/1.6 monospace;
+        letter-spacing: 4px;
+        margin-bottom: 27px;
+      }
+      .intro h1 {
+        font-size: clamp(30px, 3.5vw, 49px);
+        font-weight: 350;
+        letter-spacing: -2px;
+        line-height: 1.6;
+        margin: 0;
+        color: #d3dedd;
+      }
+      .intro h1 em {
+        font-family: Georgia, "Apple SD Gothic Neo", serif;
+        font-weight: 300;
+        font-style: normal;
+        color: #a6bbc4;
+      }
+      .intro p {
+        font-size: 13px;
+        line-height: 1.9;
+        color: #9bacb4;
+        margin-top: 26px;
+        letter-spacing: 0.04em;
+      }
+      .voyage-title {
+        position: fixed;
+        left: 5.5%;
+        bottom: 88px;
+        z-index: 3;
+        max-width: min(420px, 70vw);
+        pointer-events: none;
+      }
+      .voyage-title small {
+        display: block;
+        font: 9px monospace;
+        letter-spacing: 3px;
+        color: #91a6af;
+        margin-bottom: 14px;
+      }
+      .voyage-title p {
+        font-size: 17px;
+        font-weight: 350;
+        line-height: 1.8;
+        white-space: pre-line;
+        margin: 0;
+        color: #c6d4d6;
+      }
+      .scene-object {
+        position: absolute;
+        z-index: 3;
+        border: 0;
+        background: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        color: #a8b9be;
+      }
+      .boat {
+        left: 51%;
+        top: 65%;
+        width: 132px;
+        min-height: 140px;
+        transition:
+          left 9s ease-in-out,
+          top 9s ease-in-out;
+      }
+      .boat svg {
+        width: 115px;
+        height: 120px;
+        overflow: visible;
+        filter: drop-shadow(0 8px 18px #ddc08b12);
+        animation: bob 8s ease-in-out infinite;
+        transform-origin: 50% 80%;
+      }
+      .boat:hover svg,
+      .boat:focus-visible svg {
+        filter: drop-shadow(0 0 14px #e4cc9d35);
+      }
+      .object-label {
+        display: block;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        margin-top: 4px;
+        color: #94abb5;
+        transition: color 0.3s;
+      }
+      .boat .object-label {
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+      .boat:hover .object-label,
+      .boat:focus-visible .object-label {
+        opacity: 1;
+      }
+      .voyaging .boat {
+        left: 61%;
+        top: 61%;
+      }
+      .crew-tag {
+        font-size: 9px;
+        border: 1px solid #c4d9d126;
+        border-radius: 20px;
+        padding: 5px 9px;
+        background: #10212bc7;
+        color: #b1c9c5;
+      }
+      .north {
+        left: 72%;
+        top: 20%;
+        width: 90px;
+        height: 85px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 2s;
+      }
+      .north.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .north-mark {
+        width: 9px;
+        height: 9px;
+        background: #fff5ce;
+        transform: rotate(45deg);
+        box-shadow:
+          0 0 15px 5px #e0c48b55,
+          0 0 65px 23px #a0c6d61c;
+      }
+      .north-mark:before,
+      .north-mark:after {
+        content: "";
+        position: absolute;
+        background: linear-gradient(transparent, #fff2b6, transparent);
+        left: 4px;
+        top: -15px;
+        width: 1px;
+        height: 39px;
+        transform: rotate(-45deg);
+      }
+      .north-mark:after {
+        transform: rotate(45deg);
+      }
+      .north .object-label {
+        margin-top: 27px;
+        color: #c9cbb1;
+        font-size: 10px;
+      }
+      .lighthouse {
+        left: 22%;
+        top: 52%;
+        width: 120px;
+        min-height: 150px;
+      }
+      .lighthouse svg {
+        width: 100px;
+        height: 122px;
+        overflow: visible;
+      }
+      .lighthouse .object-label {
+        color: #bac7bd;
+      }
+      .city {
+        left: 85%;
+        top: 48%;
+        width: 145px;
+        min-height: 110px;
+      }
+      .city svg {
+        width: 130px;
+        height: 90px;
+      }
+      .city .object-label {
+        color: #a9b6b4;
+      }
+      .beam {
+        animation: beam 12s ease-in-out infinite;
+        transform-origin: 55px 29px;
+      }
+      .foot {
+        position: fixed;
+        z-index: 3;
+        left: 5.5%;
+        right: 5.5%;
+        bottom: max(30px, calc(env(safe-area-inset-bottom) + 18px));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #7b929f;
+        font-size: 10px;
+        letter-spacing: 0.07em;
+        gap: 20px;
+      }
+      .foot .start {
+        border: 0;
+        background: none;
+        color: #aebdc3;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+        padding: 15px;
+        display: flex;
+        gap: 13px;
+        align-items: center;
+        margin: auto;
+      }
+      .start:before,
+      .start:after {
+        content: "";
+        display: inline-block;
+        width: 37px;
+        height: 1px;
+        background: #a0b6c338;
+      }
+      .foot .subfoot {
+        font: 9px monospace;
+        letter-spacing: 2px;
+      }
+      .save-indicator {
+        font-size: 10px;
+        color: #8daea8;
+      }
+      .storage-warning {
+        position: fixed;
+        z-index: 9;
+        top: 100px;
+        right: 5%;
+        max-width: 350px;
+        padding: 14px 18px;
+        border: 1px solid #c2a07c55;
+        border-radius: 14px;
+        color: #eed8bc;
+        background: #202329f2;
+        font-size: 12px;
+        line-height: 1.8;
+      }
+      .discovery {
+        position: fixed;
+        z-index: 6;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background:
+          radial-gradient(ellipse at 67% 25%, #b5d1d90e, transparent 65%),
+          #030b145c;
+        animation: reveal 2s ease;
+      }
+      .discovery > div {
+        max-width: 620px;
+        padding: 30px;
+      }
+      .discovery .tiny-label {
+        color: #d1bb8d;
+        letter-spacing: 4px;
+      }
+      .discovery h2 {
+        font-weight: 350;
+        font-size: clamp(28px, 4vw, 44px);
+        letter-spacing: -1.5px;
+        line-height: 1.5;
+        margin: 23px 0;
+      }
+      .discovery p {
+        font-size: 15px;
+        line-height: 2;
+        color: #b4c9d0;
+        white-space: pre-line;
+      }
+      .discovery button {
+        margin-top: 22px;
+      }
+      .spark-wave {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          circle at 72% 20%,
+          #eddbab35,
+          transparent 1%
+        );
+        animation: star-wave 4s ease-out forwards;
+        z-index: -1;
+      }
+      .skip {
+        position: fixed;
+        left: 10px;
+        top: -100px;
+        z-index: 20;
+        background: var(--panel);
+        padding: 15px;
+        color: var(--ink);
+      }
+      .skip:focus {
+        top: 10px;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+      /* The floating logbook only appears when the sailor asks for it. */
+      dialog {
+        color: var(--ink);
+        border: 1px solid #9dbac22b;
+        border-radius: 24px;
+        background: linear-gradient(145deg, #12222efc, #091724fc);
+        box-shadow: 0 26px 120px #0007;
+        padding: 0;
+        width: min(460px, calc(100vw - 40px));
+        max-height: calc(100dvh - 100px);
+        position: fixed;
+        inset: auto 34px 34px auto;
+        margin: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: #536b76 #0a1822;
+      }
+      dialog::backdrop {
+        background: #02091252;
+        backdrop-filter: blur(2px);
+      }
+      .sheet-head {
+        padding: 25px 27px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+      }
+      .sheet-head .kicker,
+      .tiny-label {
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: #a6bbb9;
+        font-family: monospace;
+      }
+      .sheet-body {
+        padding: 17px 27px 28px;
+      }
+      .sheet-body h2 {
+        font-size: 25px;
+        line-height: 1.65;
+        font-weight: 430;
+        letter-spacing: -1px;
+        margin: 7px 0 13px;
+        white-space: pre-line;
+      }
+      .sub {
+        font-size: 12px;
+        line-height: 1.9;
+        color: var(--muted);
+        margin: 10px 0 20px;
+      }
+      .sheet-body p {
+        overflow-wrap: anywhere;
+      }
+      .sheet-body label.field-label {
+        display: block;
+        font-size: 11px;
+        color: #b0c2c7;
+        margin: 20px 0 10px;
+      }
+      .answer {
+        display: block;
+        width: 100%;
+        background: #05121b80;
+        border: 1px solid #879fad40;
+        border-radius: 13px;
+        padding: 17px 16px;
+        min-height: 145px;
+        resize: vertical;
+        font-size: 16px;
+        line-height: 1.85;
+        color: #e0e8e6;
+        outline-offset: 3px;
+        transition: border-color 0.2s;
+      }
+      .answer::placeholder {
+        color: #6f8a98;
+      }
+      .answer:focus {
+        border-color: #b3c7c18c;
+      }
+      .answer.small {
+        min-height: 100px;
+      }
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 22px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        border: 1px solid #91aaa54d;
+        border-radius: 50px;
+        background: #b5c9bf;
+        color: #10252b;
+        min-height: 45px;
+        padding: 12px 21px;
+        font-size: 12px;
+        font-weight: 650;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+      }
+      .btn:hover {
+        background: #d0dbcb;
+      }
+      .btn.ghost {
+        background: transparent;
+        color: #b3c6cb;
+        border-color: #92a8b137;
+      }
+      .btn.gold {
+        background: #d2bc8c;
+        border-color: #e9d1a1;
+        color: #24271e;
+      }
+      .btn.danger {
+        background: #5b393f44;
+        color: #e2bcb8;
+        border-color: #c59c9a40;
+      }
+      .link {
+        background: none;
+        border: 0;
+        color: #9cb8bf;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        font-size: 11px;
+        padding: 12px 0;
+      }
+      .error {
+        color: #ebbaad;
+        font-size: 12px;
+        line-height: 1.8;
+        min-height: 0;
+      }
+      .error:not(:empty) {
+        margin-top: 12px;
+      }
+      .step-count {
+        font: 9px monospace;
+        color: #96b3c0;
+        letter-spacing: 2px;
+      }
+      .context {
+        border-left: 1px solid #a6c7c151;
+        padding-left: 14px;
+        margin: 20px 0;
+        color: #b0c3c6;
+        font-size: 12px;
+        line-height: 1.85;
+        white-space: pre-line;
+      }
+      .check-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 12px;
+        line-height: 1.8;
+        color: #b6c7cc;
+        margin: 15px 0;
+        cursor: pointer;
+      }
+      .check-row input {
+        accent-color: #c9c89d;
+        margin-top: 4px;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+      .goal-summary {
+        display: grid;
+        grid-template-columns: 45px 1fr;
+        gap: 13px 12px;
+        margin: 22px 0;
+        font-size: 12px;
+        line-height: 1.8;
+      }
+      .goal-summary dt {
+        color: #7997a6;
+      }
+      .goal-summary dd {
+        margin: 0;
+        color: #c0d0d0;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+      .waypoints {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        margin: 12px -4px 22px;
+        padding: 4px;
+        scrollbar-width: thin;
+      }
+      .waypoint {
+        flex-shrink: 0;
+        border: 1px solid #91adba30;
+        background: none;
+        padding: 9px 12px;
+        border-radius: 30px;
+        color: #8fa7b4;
+        min-height: 40px;
+        font-size: 11px;
+      }
+      .waypoint.active {
+        background: #c1d0c01a;
+        color: #d4e1da;
+        border-color: #a9c3bd7a;
+      }
+      .waypoint.done:before {
+        content: "· ";
+        color: #d0ba85;
+      }
+      .plan-progress {
+        height: 2px;
+        background: #a9c0cd20;
+        margin: 20px 0;
+      }
+      .plan-progress > span {
+        height: 100%;
+        display: block;
+        background: #b3c5b5;
+        transition: width 0.7s;
+      }
+      .paper-section {
+        padding: 20px 0;
+        border-top: 1px solid var(--line);
+      }
+      .paper-section h3 {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 9px;
+      }
+      .paper-section p {
+        font-size: 13px;
+        line-height: 1.9;
+        color: #b3c9cd;
+        white-space: pre-line;
+        margin: 0;
+      }
+      .paper-section .link {
+        font-size: 10px;
+      }
+      .demo-notice {
+        border: 1px solid #bbac7642;
+        background: #e4cf9b0a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 11px;
+        color: #ccbea0;
+        line-height: 1.8;
+        margin: 7px 0 20px;
+      }
+      .city-tabs {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      .city-tabs button {
+        flex: 1;
+        line-height: 1.7;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #c7d7db26;
+        background: transparent;
+        font-size: 11px;
+        color: #a3bbc2;
+      }
+      .city-tabs button.active {
+        border-color: #d4bc8177;
+        color: #e1d2ae;
+        background: #e8cc8310;
+      }
+      .person {
+        padding: 17px 0;
+        border-top: 1px solid var(--line);
+      }
+      .person h3 {
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 0;
+      }
+      .avatar {
+        height: 29px;
+        width: 29px;
+        background: #9cbdaf20;
+        color: #bbd1c6;
+        border: 1px solid #c2d2c223;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+      }
+      .person h3 small {
+        font-size: 9px;
+        color: #91a6b0;
+        font-weight: 400;
+      }
+      .person p {
+        font-size: 13px;
+        line-height: 1.9;
+        color: #b8cbd0;
+        margin: 11px 0 0;
+      }
+      .status {
+        font-size: 10px;
+        color: #c6b88f;
+        display: block;
+        margin-top: 11px;
+      }
+      .person .actions {
+        margin-top: 9px;
+      }
+      .log-item {
+        border-top: 1px solid var(--line);
+        padding: 15px 0;
+      }
+      .log-open {
+        border: 0;
+        background: none;
+        text-align: left;
+        padding: 9px 0;
+        width: 100%;
+        color: #c2d4d5;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+      .log-open small {
+        display: block;
+        font-size: 10px;
+        color: #86a2ae;
+        margin-top: 6px;
+      }
+      .empty {
+        padding: 25px 0;
+        color: #b6cad0;
+        font-size: 14px;
+        line-height: 2;
+      }
+      .settings-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-top: 1px solid var(--line);
+        gap: 18px;
+        font-size: 13px;
+      }
+      .settings-row input {
+        accent-color: var(--gold);
+        width: 18px;
+        height: 18px;
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: max(35px, calc(env(safe-area-inset-bottom) + 24px));
+        transform: translate(-50%, 12px);
+        width: max-content;
+        max-width: calc(100vw - 38px);
+        padding: 13px 22px;
+        border: 1px solid #a9bec137;
+        border-radius: 16px;
+        background: #10232ef5;
+        box-shadow: 0 10px 40px #0005;
+        color: #c9d9d8;
+        font-size: 12px;
+        line-height: 1.8;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 20;
+        transition:
+          opacity 0.25s,
+          transform 0.25s;
+      }
+      .toast.on {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      .save-status {
+        font-size: 10px;
+        color: #8daaa8;
+        margin-top: 14px;
+      }
+      .save-status.failed {
+        color: #e2b4a5;
+      }
+      .divider {
+        height: 1px;
+        background: var(--line);
+        margin: 24px 0;
+      }
+      @keyframes bob {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-1.7deg);
+        }
+        50% {
+          transform: translateY(5px) rotate(1.8deg);
+        }
+      }
+      @keyframes beam {
+        0%,
+        100% {
+          opacity: 0.13;
+          transform: rotate(-6deg);
+        }
+        50% {
+          opacity: 0.55;
+          transform: rotate(8deg);
+        }
+      }
+      @keyframes reveal {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes star-wave {
+        0% {
+          opacity: 0;
+          background-size: 100% 100%;
+          transform: scale(0.5);
+        }
+        30% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(3);
+        }
+      }
+      @media (min-width: 1500px) {
+        .intro {
+          left: 15%;
+          top: 27%;
+        }
+      }
+      @media (max-width: 650px) {
+        .top {
+          top: max(24px, env(safe-area-inset-top));
+          left: 8%;
+          right: 7%;
+        }
+        .brand {
+          font-size: 36px;
+        }
+        .brand small {
+          font-size: 8px;
+          margin-top: 11px;
+        }
+        .header-actions {
+          gap: 12px;
+        }
+        .round {
+          width: 40px;
+          height: 40px;
+        }
+        .intro {
+          left: 9%;
+          top: 23%;
+        }
+        .intro .overline {
+          font-size: 8px;
+          letter-spacing: 3px;
+          margin-bottom: 22px;
+        }
+        .intro h1 {
+          font-size: 33px;
+          letter-spacing: -1.5px;
+        }
+        .intro p {
+          font-size: 11px;
+          margin-top: 20px;
+          line-height: 2;
+        }
+        .boat {
+          top: 65%;
+          width: 118px;
+        }
+        .boat svg {
+          width: 96px;
+          height: 108px;
+        }
+        .boat .object-label {
+          opacity: 0.7;
+          font-size: 9px;
+        }
+        .voyaging .boat {
+          left: 57%;
+          top: 64%;
+        }
+        .north {
+          left: 73%;
+          top: 23%;
+        }
+        .city {
+          left: 85%;
+          top: 50%;
+          width: 95px;
+          min-height: 100px;
+        }
+        .city svg {
+          width: 91px;
+          height: 72px;
+        }
+        .city .object-label {
+          font-size: 9px;
+        }
+        .lighthouse {
+          left: 16%;
+          top: 55%;
+          width: 90px;
+          min-height: 115px;
+        }
+        .lighthouse svg {
+          width: 77px;
+          height: 100px;
+        }
+        .lighthouse .object-label {
+          font-size: 9px;
+        }
+        .foot {
+          left: 8%;
+          right: 8%;
+          bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+        }
+        .foot .subfoot {
+          display: none;
+        }
+        .foot .start {
+          font-size: 10px;
+          letter-spacing: 0;
+          padding: 15px 0;
+          gap: 9px;
+        }
+        .start:before,
+        .start:after {
+          width: 15px;
+        }
+        .voyage-title {
+          left: 9%;
+          bottom: 105px;
+          max-width: 68vw;
+        }
+        .voyage-title p {
+          font-size: 14px;
+        }
+        .voyage-title small {
+          font-size: 8px;
+        }
+        .text-btn {
+          font-size: 11px;
+        }
+        dialog {
+          inset: auto 0 0 0;
+          width: 100%;
+          max-width: 100vw;
+          max-height: 83dvh;
+          border-radius: 24px 24px 0 0;
+          border-bottom: 0;
+        }
+        .sheet-head {
+          padding: 20px 24px 0;
+        }
+        .sheet-body {
+          padding: 15px 24px max(25px, calc(env(safe-area-inset-bottom) + 18px));
+        }
+        .sheet-body h2 {
+          font-size: 24px;
+        }
+        .discovery > div {
+          padding: 27px;
+        }
+        .discovery p {
+          font-size: 14px;
+        }
+        .storage-warning {
+          top: 96px;
+          right: 7%;
+          left: 7%;
+          max-width: none;
+        }
+        .answer {
+          min-height: 135px;
+          font-size: 16px;
+        }
+        .sheet-head .round {
+          width: 36px;
+          height: 36px;
+        }
+        .actions .btn {
+          flex-grow: 1;
+        }
+        .scene-object {
+          touch-action: manipulation;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *:before,
+        *:after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+      .still *,
+      .still *:before,
+      .still *:after {
+        animation: none !important;
+        transition: none !important;
+      }
+      /* A chart is opened by the sailor; the sea itself stays quiet. */
+      dialog:has(.voyage-map) {
+        width: min(540px, calc(100vw - 48px));
+      }
+      .chart-drawing {
+        margin: 14px -8px 20px;
+        border-block: 1px solid #a4beb21c;
+        background: radial-gradient(
+          ellipse at 40% 60%,
+          #739b8c0b,
+          transparent 70%
+        );
+        overflow: hidden;
+      }
+      .chart-drawing svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 210px;
+      }
+      .chart-drawing text {
+        fill: #8ba6ad;
+        font-size: 9px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+        letter-spacing: 0.3px;
+      }
+      .chart-contour {
+        stroke: #a1b8b0;
+        stroke-width: 0.7;
+        opacity: 0.12;
+        fill: none;
+      }
+      .chart-unread {
+        stroke: #8aa6ad;
+        stroke-width: 1;
+        stroke-dasharray: 3 7;
+        fill: none;
+        opacity: 0.4;
+      }
+      .chart-read {
+        stroke: #c5d0b5;
+        stroke-width: 1.5;
+        fill: none;
+      }
+      .chart-side-path {
+        stroke: #b6b28b;
+        stroke-width: 0.7;
+        stroke-dasharray: 2 5;
+        opacity: 0.4;
+        fill: none;
+      }
+      .chart-known {
+        fill: #c8d7c8;
+      }
+      .chart-unknown {
+        fill: #17333e;
+        stroke: #829ea7;
+        stroke-width: 0.7;
+      }
+      .chart-drawing .chart-destination {
+        fill: #d7c393;
+      }
+      .chart-invitation {
+        color: #9db4bd;
+        font-size: 12px;
+        line-height: 1.95;
+        margin: 0 0 23px;
+      }
+      .chart-question {
+        font-size: 15px;
+        font-weight: 450;
+        letter-spacing: -0.3px;
+        color: #d1dedb;
+        line-height: 1.8;
+        margin: 0 0 14px;
+      }
+      .entry-choices {
+        display: grid;
+        gap: 10px;
+      }
+      .entry-choice {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-align: left;
+        padding: 17px 15px;
+        border: 1px solid #98b4b130;
+        border-radius: 14px;
+        background: linear-gradient(115deg, #95b8ad0a, #0a1a2520);
+        color: #d1ddda;
+        width: 100%;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+      }
+      .entry-choice:hover,
+      .entry-choice.selected {
+        border-color: #bbc8a972;
+        background: #b1c1aa14;
+      }
+      .entry-buoy {
+        width: 31px;
+        height: 31px;
+        border: 1px solid #a5bfbb3b;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font: 10px monospace;
+        letter-spacing: 1px;
+        color: #b0c5be;
+        flex-shrink: 0;
+      }
+      .entry-choice strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.7;
+        letter-spacing: -0.25px;
+      }
+      .entry-choice small {
+        display: block;
+        color: #8faab3;
+        font-size: 11px;
+        line-height: 1.9;
+        margin-top: 3px;
+      }
+      .entry-arrow {
+        color: #afbea3;
+        margin-left: auto;
+      }
+      .chart-footnote {
+        font-size: 10px;
+        line-height: 1.8;
+        color: #809ba6;
+        margin: 16px 0 0;
+      }
+      .chart-current {
+        padding: 15px 16px;
+        background: #98b69b0b;
+        border: 1px solid #9fb79829;
+        border-radius: 14px;
+        margin-bottom: 24px;
+      }
+      .chart-current > span {
+        font-size: 10px;
+        color: #b6c4a8;
+        line-height: 1.8;
+      }
+      .chart-current p {
+        font-size: 13px;
+        line-height: 1.8;
+        margin: 9px 0 0;
+        color: #c5d4d2;
+        white-space: pre-line;
+      }
+      .chart-current .link {
+        padding-bottom: 0;
+      }
+      .archive-raw {
+        font-size: 11px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #9db4bf;
+      }
+      .paper-section summary {
+        cursor: pointer;
+        min-height: 36px;
+        font-size: 12px;
+        color: #b6c8cd;
+      }
+      .header-actions {
+        gap: 15px;
+      }
+      @media (max-width: 650px) {
+        dialog:has(.voyage-map) {
+          width: 100%;
+          max-width: 100vw;
+        }
+        .chart-drawing {
+          margin: 8px -5px 17px;
+        }
+        .chart-invitation {
+          font-size: 12px;
+          margin-bottom: 19px;
+        }
+        .entry-choice {
+          padding: 14px 12px;
+          gap: 11px;
+        }
+        .entry-choice strong {
+          font-size: 13px;
+        }
+        .entry-choice small {
+          font-size: 10px;
+        }
+        .chart-question {
+          font-size: 14px;
+        }
+        .header-actions {
+          gap: 8px;
+        }
+        .header-actions .text-btn {
+          font-size: 10px;
+          padding-inline: 2px;
+        }
+        .chart-current {
+          padding: 13px;
+        }
+        .chart-current p {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#boat">작은 배로 이동해 항해 시작하기</a>
+    <main
+      id="world"
+      aria-label="생각의 바다. 어두운 바다의 작은 배를 선택해 생각을 기록하세요."
+    >
+      <canvas id="ocean" class="sky" aria-hidden="true"></canvas>
+      <header class="top">
+        <button
+          class="brand"
+          data-action="home"
+          aria-label="Moru 바다로 돌아가기"
+        >
+          moru<i>.</i><small>THE SEA OF THOUGHTS</small>
+        </button>
+        <div class="header-actions">
+          <button id="map-button" class="text-btn" data-action="chart" hidden>
+            항해 지도
+          </button>
+          <button id="log-button" class="text-btn" data-action="log" hidden>
+            항해 일지</button
+          ><button
+            class="round"
+            data-action="settings"
+            aria-label="보관함과 설정"
+          >
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+            >
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="m15 8-2 6-4 2 2-6z" />
+              <path d="M12 1v2m0 18v2M1 12h2m18 0h2" />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div id="intro" class="intro">
+        <div class="overline">EVERY VOYAGE BEGINS WITH A THOUGHT</div>
+        <h1>아직 이름 없는<br /><em>생각의 바다.</em></h1>
+        <p>
+          어디로 가야 할지 몰라도 괜찮아요.<br />작은 생각 하나면, 출발할 수
+          있으니까.
+        </p>
+      </div>
+      <button
+        id="boat"
+        class="scene-object boat"
+        data-action="boat"
+        aria-label="작은 배를 눌러 첫 항해 시작"
+      >
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <defs>
+            <linearGradient id="sail" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="#e8e1ca" />
+              <stop offset="1" stop-color="#9caba9" />
+            </linearGradient>
+            <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+              <stop stop-color="#ac8b5e" />
+              <stop offset="1" stop-color="#3f463f" />
+            </linearGradient>
+          </defs>
+          <ellipse
+            cx="81"
+            cy="139"
+            rx="50"
+            ry="3"
+            fill="#96aeb7"
+            opacity=".1"
+          />
+          <path d="M81 24v103" stroke="#a99574" stroke-width="2" />
+          <path d="M78 31 40 112 78 103Z" fill="url(#sail)" opacity=".94" />
+          <path d="m86 50 26 59-26-6Z" fill="#bac4b9" opacity=".8" />
+          <path
+            d="m78 31-38 81h38M86 50l26 59-26-6"
+            fill="none"
+            stroke="#d4d6c7"
+            stroke-width=".6"
+            opacity=".5"
+          />
+          <path
+            d="M29 119Q80 131 132 116l-16 21q-35 12-72-1Z"
+            fill="url(#hull)"
+            stroke="#b19c78"
+            stroke-width=".8"
+          />
+          <path
+            d="M34 122q48 10 93-3"
+            fill="none"
+            stroke="#d4bd8b"
+            opacity=".5"
+          />
+          <path d="m47 135 62 3" stroke="#3b474a" />
+          <circle cx="67" cy="116" r="2" fill="#edce89" opacity=".8" /></svg
+        ><span class="object-label">내 작은 배</span
+        ><span id="crew-label" class="crew-tag" hidden
+          >함께 타는 모습 · 데모</span
+        >
+      </button>
+      <button
+        id="north"
+        class="scene-object north"
+        data-action="goal"
+        aria-label="발견한 북극성 목표 열기"
+        hidden
+      >
+        <span class="north-mark"></span
+        ><span class="object-label">나의 북극성</span>
+      </button>
+      <button
+        id="lighthouse"
+        class="scene-object lighthouse"
+        data-action="lighthouse"
+        aria-label="나의 등대: 구체화한 아이디어 열기"
+        hidden
+      >
+        <svg viewBox="0 0 110 140" aria-hidden="true">
+          <defs>
+            <linearGradient id="tower" x1="0" x2="1">
+              <stop stop-color="#87928b" />
+              <stop offset=".52" stop-color="#c0bda1" />
+              <stop offset="1" stop-color="#4d6667" />
+            </linearGradient>
+            <radialGradient id="lamp">
+              <stop stop-color="#ffe6a3" stop-opacity=".7" />
+              <stop offset="1" stop-color="#f4dd9c" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <path
+            class="beam"
+            d="M54 29 198 0v63Z"
+            fill="#d8d4a5"
+            opacity=".18"
+          />
+          <ellipse cx="54" cy="127" rx="47" ry="7" fill="#243a42" />
+          <path d="m11 126 18-14 32-4 27 17Z" fill="#334b4d" />
+          <path d="m44 42-8 77h37l-9-77Z" fill="url(#tower)" />
+          <path d="M39 84h29l-2-12H41Z" fill="#6e7770" />
+          <path d="M42 41h24v-5H42Z" fill="#b6b49e" />
+          <path d="M45 36V23h18v13" stroke="#bcad8c" fill="#455958" />
+          <path d="m42 23 12-10 12 10Z" fill="#b2a58a" />
+          <circle cx="54" cy="29" r="28" fill="url(#lamp)" />
+          <path d="M50 26h8v8h-8Z" fill="#ead39a" />
+          <path d="M51 119v-15h9v15" fill="#354d51" /></svg
+        ><span class="object-label">나의 등대</span>
+      </button>
+      <button
+        id="city"
+        class="scene-object city"
+        data-action="city"
+        aria-label="비슷한 문제를 나누는 도시: 데모 체험"
+        hidden
+      >
+        <svg viewBox="0 0 160 100" aria-hidden="true">
+          <path d="M6 83q70-10 149 0l-9 7H16Z" fill="#223b44" />
+          <g fill="#30444c" stroke="#7c8580" stroke-width=".5">
+            <path
+              d="M21 80V54h18v26M42 81V43h20v38M67 80V28h17v52M91 80V49h21v31M118 81V38h19v43"
+            />
+            <path d="m17 54 13-10 13 10M39 43l13-11 13 11M115 38l13-10 13 10" />
+          </g>
+          <g fill="#d3bc7d" opacity=".75">
+            <path
+              d="M26 62h3v4h-3m5 5h3v4h-3M48 52h3v4h-3m4 9h4v5h-4M72 40h4v5h-4m3 10h4v5h-4m-7 11h4v4h-4M98 57h4v4h-4m3 9h4v4h-4M124 48h4v5h-4m1 10h4v5h-4"
+            />
+          </g>
+          <path
+            d="M24 89v3m30-3v7m20-7v5m27-5v8m27-8v4"
+            stroke="#d1b57b"
+            opacity=".22"
+          /></svg
+        ><span class="object-label">함께의 도시 · 데모</span>
+      </button>
+      <div id="voyage-title" class="voyage-title" hidden></div>
+      <footer class="foot">
+        <span id="foot-left" class="subfoot">A QUIET PLACE TO BEGIN</span
+        ><button id="start-hint" class="start" data-action="boat">
+          작은 배를 눌러 첫 항해를 시작하세요</button
+        ><span id="foot-right" class="subfoot"
+          >YOUR OWN PACE, YOUR OWN NORTH.</span
+        >
+      </footer>
+    </main>
+    <div id="storage-warning" class="storage-warning" role="alert" hidden></div>
+    <section
+      id="discovery"
+      class="discovery"
+      aria-live="polite"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="discovery-title"
+      hidden
+    >
+      <span class="spark-wave"></span>
+      <div>
+        <span class="tiny-label">YOUR NORTH, AT LAST.</span>
+        <h2 id="discovery-title">
+          수많은 가능성 속에서,<br />당신의 방향을 찾았어요.
+        </h2>
+        <p id="discovery-goal"></p>
+        <button class="btn gold" data-action="continue">
+          이 별을 따라 항해하기 <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </section>
+    <dialog id="sheet" aria-labelledby="sheet-title">
+      <div class="sheet-head">
+        <span id="sheet-kicker" class="kicker"></span
+        ><button
+          class="round"
+          data-action="close"
+          aria-label="항해 화면으로 돌아가기"
+        >
+          ×
+        </button>
+      </div>
+      <div id="sheet-body" class="sheet-body"></div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <input
+      id="restore-file"
+      type="file"
+      accept=".json,application/json"
+      hidden
+      aria-label="바다 항해 백업 복원"
+    />
+    <script>
+      (() => {
+        "use strict";
+        const KEY = "moru_ocean_v1",
+          $ = (id) => document.getElementById(id),
+          esc = (v) =>
+            String(v ?? "").replace(
+              /[&<>"']/g,
+              (c) =>
+                ({
+                  "&": "&amp;",
+                  "<": "&lt;",
+                  ">": "&gt;",
+                  '"': "&quot;",
+                  "'": "&#39;",
+                })[c],
+            ),
+          id = () =>
+            crypto.randomUUID?.() ||
+            "v" + Date.now().toString(36) + Math.random().toString(36).slice(2),
+          clip = (s, n = 70) => (s.length > n ? s.slice(0, n) + "…" : s);
+        let state = {
+            app: "moru-ocean",
+            version: 1,
+            voyages: [],
+            activeId: null,
+            settings: { still: false },
+            proposals: [],
+          },
+          disk = null,
+          blocked = false,
+          storeError = "",
+          view = "",
+          editField = "solution",
+          returnFocus = null,
+          cityId = "time",
+          invitePerson = null,
+          goalDraft = "",
+          checks = [false, false, false];
+        const core = [
+          [
+            "problem",
+            "어떤 순간이 가장\n불편하거나 아쉬웠나요?",
+            "예: 하루에 해야 할 일이 흩어져 있어, 무엇부터 할지 정하는 데 시간을 써요.",
+            "한 가지 실제 장면이면 충분해요.",
+          ],
+          [
+            "audience",
+            "그 일을 겪는 사람을\n한 명 떠올리면요?",
+            "예: 수업과 아르바이트를 병행하는 대학생",
+            "모두를 위한 답보다, 떠오르는 한 사람을 적어 보세요.",
+          ],
+          [
+            "change",
+            "그 사람의 하루가\n어떻게 달라지면 좋을까요?",
+            "예: 하루를 시작할 때, 지금 할 일 하나를 바로 고를 수 있으면 좋겠어요.",
+            "무엇을 만들지보다, 어떤 변화가 생길지 생각해 보세요.",
+          ],
+        ];
+        const planning = [
+          [
+            "problem",
+            "해결하려는 문제",
+            "실제로 겪는 불편한 장면을 설명해 주세요.",
+          ],
+          [
+            "audience",
+            "문제를 겪는 사람",
+            "이 불편을 겪는 구체적인 사람이나 상황을 적어 주세요.",
+          ],
+          [
+            "solution",
+            "해결 방법",
+            "무엇을, 어떤 방식으로 제공할 건가요? 가장 작은 기능부터 적어 보세요.",
+          ],
+          [
+            "difference",
+            "기존 대안과 다른 점",
+            "지금은 어떻게 해결하고 있나요? 그 방법에서 무엇이 달라지나요?",
+          ],
+          [
+            "plan",
+            "첫 실행 계획",
+            "누가, 언제, 무엇부터 해볼지 적어 주세요. 작아도 구체적이면 좋아요.",
+          ],
+          [
+            "validation",
+            "실제 검증 방법",
+            "누구에게 무엇을 시험하고, 어떤 반응이나 수치를 확인할 건가요?",
+          ],
+        ];
+        const cities = [
+          {
+            id: "time",
+            name: "시간을 되찾는 항구",
+            problem: "해야 할 일은 많은데, 어디서부터 시작할지 모르겠어요.",
+            people: [
+              {
+                id: "yun",
+                name: "윤",
+                thought:
+                  "수업과 아르바이트가 겹치는 날이면, 하루를 계획하다가 하루가 끝나요.",
+              },
+              {
+                id: "seo",
+                name: "서",
+                thought:
+                  "할 일 앱은 여러 개 써 봤지만, 정작 중요한 일 하나를 고르기가 어려워요.",
+              },
+              {
+                id: "ha",
+                name: "하",
+                thought:
+                  "팀원마다 일정 관리 방법이 달라서 같이 일할 시간을 잡는 게 늘 어려워요.",
+              },
+            ],
+          },
+          {
+            id: "connection",
+            name: "서로를 찾는 작은 도시",
+            problem: "곁에 사람이 있어도, 마음 맞는 연결을 찾기 어려워요.",
+            people: [
+              {
+                id: "ram",
+                name: "람",
+                thought: "새 동네에 왔는데, 인사할 이웃을 만날 계기가 없어요.",
+              },
+              {
+                id: "ji",
+                name: "지",
+                thought:
+                  "관심 있는 주제로 편하게 이야기할 작은 모임을 찾고 싶어요.",
+              },
+              {
+                id: "sol",
+                name: "솔",
+                thought:
+                  "처음 모임에 나갈 때 느끼는 어색함 때문에 자꾸 다음으로 미뤄요.",
+              },
+            ],
+          },
+        ];
+        function validateState(raw) {
+          if (
+            !raw ||
+            raw.app !== "moru-ocean" ||
+            raw.version !== 1 ||
+            !Array.isArray(raw.voyages) ||
+            raw.voyages.length > 100 ||
+            !raw.settings ||
+            typeof raw.settings.still !== "boolean" ||
+            !Array.isArray(raw.proposals)
+          )
+            throw Error("Moru 바다 백업 형식이 아니에요.");
+          const ids = new Set();
+          for (const v of raw.voyages) {
+            if (
+              !v ||
+              typeof v.id !== "string" ||
+              ids.has(v.id) ||
+              typeof v.idea !== "string" ||
+              !v.fields ||
+              !Number.isInteger(v.step) ||
+              v.step < 0 ||
+              v.step > 4 ||
+              !Array.isArray(v.crew)
+            )
+              throw Error("항해 기록을 확인할 수 없어요.");
+            if (
+              v.entryPoint !== undefined &&
+              v.entryPoint !== null &&
+              !["drift", "problem", "idea"].includes(v.entryPoint)
+            )
+              throw Error("출발 위치 기록 형식이 올바르지 않아요.");
+            ids.add(v.id);
+            for (const [k] of [...core, ...planning])
+              if (typeof v.fields[k] !== "string")
+                throw Error("일부 항해 내용이 올바르지 않아요.");
+            if (
+              v.goal !== null &&
+              (!v.goal ||
+                typeof v.goal.text !== "string" ||
+                typeof v.goal.approvedAt !== "number")
+            )
+              throw Error("목표 기록 형식이 올바르지 않아요.");
+            if (
+              v.lighthouse !== null &&
+              (!v.lighthouse ||
+                typeof v.lighthouse.builtAt !== "number" ||
+                !v.lighthouse.snapshot)
+            )
+              throw Error("등대 기록 형식이 올바르지 않아요.");
+            if (v.crew.some((x) => typeof x !== "string"))
+              throw Error("동승 기록 형식이 올바르지 않아요.");
+          }
+          if (raw.activeId !== null && !ids.has(raw.activeId))
+            throw Error("진행 중인 항해가 없어요.");
+          for (const p of raw.proposals)
+            if (
+              !p ||
+              typeof p.personId !== "string" ||
+              typeof p.body !== "string" ||
+              typeof p.cityId !== "string"
+            )
+              throw Error("데모 제안 형식이 올바르지 않아요.");
+          return raw;
+        }
+        try {
+          disk = localStorage.getItem(KEY);
+          if (disk !== null) state = validateState(JSON.parse(disk));
+        } catch (e) {
+          blocked = true;
+          storeError =
+            "기록을 읽을 수 없어 저장을 잠갔어요. 보관함에서 원본을 백업해 주세요.";
+        }
+        function toast(t) {
+          $("toast").textContent = t;
+          $("toast").classList.add("on");
+          clearTimeout(toast.timer);
+          toast.timer = setTimeout(
+            () => $("toast").classList.remove("on"),
+            4200,
+          );
+        }
+        function save(fn) {
+          if (blocked) {
+            toast(storeError);
+            return false;
+          }
+          const before = JSON.stringify(state);
+          try {
+            if (localStorage.getItem(KEY) !== disk) {
+              blocked = true;
+              throw Error(
+                "다른 탭에서 기록이 바뀌었어요. 작성 내용을 복사한 뒤 새로고침해 주세요.",
+              );
+            }
+            fn();
+            state.updatedAt = Date.now();
+            const next = JSON.stringify(state);
+            localStorage.setItem(KEY, next);
+            disk = next;
+            storeError = "";
+            setSaveStatus();
+            return true;
+          } catch (e) {
+            state = JSON.parse(before);
+            storeError = blocked
+              ? e.message
+              : "저장하지 못했어요. 작성한 내용을 복사하고 저장 공간을 확인해 주세요.";
+            toast(storeError);
+            setSaveStatus();
+            return false;
+          }
+        }
+        function setSaveStatus() {
+          const w = $("storage-warning");
+          w.hidden = !storeError;
+          w.textContent = storeError;
+          document.querySelectorAll(".save-status").forEach((el) => {
+            el.textContent = storeError
+              ? "저장되지 않음 · 내용을 복사해 주세요."
+              : "이 브라우저에 저장되어 있어요.";
+            el.classList.toggle("failed", !!storeError);
+          });
+        }
+        const current = () =>
+          state.voyages.find((v) => v.id === state.activeId);
+        function makeVoyage(idea = "", fromCity = null) {
+          if (state.voyages.length >= 100) {
+            toast("항해가 100개예요. 백업 후 쓰지 않는 항해를 정리해 주세요.");
+            return false;
+          }
+          const v = {
+            id: id(),
+            idea,
+            fields: {
+              problem: "",
+              audience: "",
+              change: "",
+              solution: "",
+              difference: "",
+              plan: "",
+              validation: "",
+            },
+            entryPoint: null,
+            step: 0,
+            created: Date.now(),
+            updated: Date.now(),
+            goal: null,
+            lighthouse: null,
+            crew: [],
+            fromCity,
+          };
+          return save(() => {
+            state.voyages.push(v);
+            state.activeId = v.id;
+          });
+        }
+        function meaningful(s, min) {
+          s = s.trim();
+          return (
+            s.length >= min &&
+            new Set(s.replace(/[\s\p{P}\p{S}]/gu, "")).size >=
+              Math.min(min, 3) &&
+            !/^(모르겠|잘 모르|글쎄|없음|아무거나|아무나|몰라)/.test(s)
+          );
+        }
+        function fieldError(k, value) {
+          if (
+            k === "audience" &&
+            (!meaningful(value, 2) ||
+              /^(모두|사람들?|누구나|모든 사람들?)$/.test(value.trim()))
+          )
+            return "떠오르는 한 사람이나 구체적인 상황을 조금 더 적어 주세요.";
+          if (
+            k !== "audience" &&
+            !meaningful(value, k === "difference" ? 5 : 8)
+          )
+            return "실제로 떠올릴 수 있는 장면을 한 문장으로 조금 더 적어 주세요.";
+          if (
+            k === "validation" &&
+            (value.trim().length < 10 ||
+              !/(관찰|비교|확인|측정|기록|물어|인터뷰|설문|테스트|검증|명|회|일|주|시간|률|수치|기준)/.test(
+                value,
+              ))
+          )
+            return "누구에게 무엇을 해보고 어떤 반응을 확인할지 함께 적어 주세요.";
+          return "";
+        }
+        function clearCore(v) {
+          return (
+            core.every(([k]) => !fieldError(k, v.fields[k])) &&
+            v.fields.problem.trim() !== v.fields.change.trim()
+          );
+        }
+        function completePlan(v) {
+          return planning.every(([k]) => !fieldError(k, v.fields[k]));
+        }
+        function openSheet(kicker, title, body) {
+          returnFocus = document.activeElement;
+          $("sheet-kicker").textContent = kicker;
+          $("sheet-body").innerHTML =
+            `<h2 id="sheet-title" tabindex="-1">${title}</h2>${body}`;
+          if (!$("sheet").open) $("sheet").showModal();
+          $("sheet").scrollTop = 0;
+          $("sheet-title").focus({ preventScroll: true });
+          setSaveStatus();
+        }
+        function closeSheet() {
+          $("sheet").close();
+        }
+        $("sheet").addEventListener("close", () => {
+          if (!$("discovery").hidden) {
+            $("discovery")
+              .querySelector("button")
+              .focus({ preventScroll: true });
+            return;
+          }
+          if (returnFocus?.isConnected)
+            returnFocus.focus({ preventScroll: true });
+          else $("boat").focus({ preventScroll: true });
+        });
+        const status = () =>
+            '<div class="save-status" role="status">이 브라우저에 저장되어 있어요.</div>',
+          error = () => '<p id="field-error" class="error" role="alert"></p>';
+        function start() {
+          if (!current() && !makeVoyage()) return;
+          const v = current();
+          if (v.goal) {
+            if (v.lighthouse) showLighthouse();
+            else showPlan();
+            return;
+          }
+          if (!routeFor(v)) {
+            syncWorld();
+            showChart();
+            return;
+          }
+          showQuestion();
+        }
+        function showQuestion() {
+          const v = current();
+          if (!v) return;
+          if (!routeFor(v)) {
+            showChart();
+            return;
+          }
+          if (v.step === 4) {
+            showGoal();
+            return;
+          }
+          view = "question";
+          const first = v.step === 0,
+            q = questionFor(v);
+          openSheet(
+            first
+              ? "YOUR STARTING POINT / " + entryRoutes[routeFor(v)].label
+              : "FINDING YOUR DIRECTION",
+            q.title,
+            `<p class="sub">${esc(q.hint)}</p>${!first ? `<div class="context">${esc(clip(v.idea, 140))}</div>` : ""}<form id="question-form" novalidate><label class="sr" for="thought-answer">${esc(q.title.replace("\n", " "))}</label><textarea id="thought-answer" class="answer" maxlength="14000" placeholder="${esc(q.placeholder)}" aria-describedby="field-error">${esc(q.value)}</textarea>${status()}${error()}<div class="actions">${!first ? '<button class="btn ghost" type="button" data-action="question-back">이전 생각</button>' : '<button class="link" type="button" data-action="chart">출발 위치 다시 고르기</button>'}<button class="btn" type="submit">${first ? "이곳에서 항해 시작하기" : "이 방향으로 이어가기"} ↗</button></div></form>${v.legacy ? '<button class="link" data-action="voyage-archive">함께 보관된 이전 기록 열기</button>' : ""}`,
+          );
+        }
+        function answerQuestion() {
+          const v = current(),
+            value = $("thought-answer").value.trim(),
+            q = questionFor(v),
+            err =
+              q.key === "idea"
+                ? !meaningful(value, 2)
+                  ? "스쳐 간 생각을 두 글자 이상 남겨 주세요."
+                  : ""
+                : fieldError(q.key, value);
+          if (err) {
+            $("field-error").textContent = err;
+            return;
+          }
+          if (
+            !save(() => {
+              const v = current();
+              if (q.key === "idea") v.idea = value;
+              else {
+                v.fields[q.key] = value;
+                if (v.step === 0 && !v.idea) v.idea = value;
+              }
+              v.step =
+                v.step === 0 && routeFor(v) === "problem" ? 2 : v.step + 1;
+              v.updated = Date.now();
+            })
+          )
+            return;
+          syncWorld();
+          showQuestion();
+        }
+        function goalCandidate(v) {
+          return `${v.fields.audience.trim()} — ${v.fields.change.trim()}`;
+        }
+        function showGoal() {
+          const v = current();
+          if (!v) return;
+          view = "goal";
+          checks = [false, false, false];
+          goalDraft = v.goalDraft || v.goal?.text || goalCandidate(v);
+          openSheet(
+            "A STAR TO CALL YOUR OWN",
+            "이 방향이,\n당신의 북극성인가요?",
+            `<p class="sub">별은 스스로 목적지를 정하지 않아요.<br>해결하고 싶은 문제가 담겼는지, 마지막으로 확인해 주세요.</p><dl class="goal-summary"><dt>문제</dt><dd>${esc(v.fields.problem)}</dd><dt>대상</dt><dd>${esc(v.fields.audience)}</dd><dt>변화</dt><dd>${esc(v.fields.change)}</dd></dl><label class="field-label" for="goal-text">나의 목표 · 직접 다듬어도 좋아요</label><textarea id="goal-text" class="answer small" maxlength="500">${esc(goalDraft)}</textarea>${["문제를 겪는 사람이 구체적으로 떠올라요.", "어떤 불편을 해결하려는지 설명할 수 있어요.", "만들고 싶은 변화가 이 목표에 담겼어요."].map((t, i) => `<label class="check-row"><input type="checkbox" data-goal-check="${i}"><span>${t}</span></label>`).join("")}${error()}<div class="actions"><button class="btn ghost" data-action="goal-back">답변 다듬기</button><button id="approve-goal" class="btn gold" data-action="approve-goal" disabled>나의 북극성으로 정하기</button></div>${!clearCore(v) ? '<p class="error">문제·대상·원하는 변화를 더 구체적으로 다듬은 뒤 목표를 정할 수 있어요.</p>' : ""}`,
+          );
+        }
+        function approveGoal() {
+          const v = current(),
+            text = $("goal-text").value.trim();
+          if (!checks.every(Boolean) || !clearCore(v) || !meaningful(text, 8)) {
+            $("field-error").textContent =
+              "세 가지를 확인하고, 누구를 위한 어떤 변화인지 목표를 다듬어 주세요.";
+            return;
+          }
+          if (
+            !save(() => {
+              current().goal = {
+                text,
+                approvedAt: Date.now(),
+                snapshot: {
+                  problem: current().fields.problem,
+                  audience: current().fields.audience,
+                  change: current().fields.change,
+                },
+              };
+              current().updated = Date.now();
+            })
+          )
+            return;
+          closeSheet();
+          syncWorld();
+          northBloom = performance.now();
+          $("discovery-goal").textContent = text;
+          $("discovery").hidden = false;
+          $("world").inert = true;
+          if (!isStill())
+            $("north").animate(
+              [
+                { opacity: 0, filter: "brightness(3)" },
+                { opacity: 1, filter: "brightness(1)" },
+              ],
+              { duration: 2800, easing: "ease-out" },
+            );
+          $("discovery").querySelector("button").focus({ preventScroll: true });
+          renderOnce();
+        }
+        function showPlan(field) {
+          const v = current();
+          if (!v?.goal) {
+            start();
+            return;
+          }
+          if (field) editField = field;
+          view = "plan";
+          const q = planning.find((x) => x[0] === editField) || planning[2],
+            count = planning.filter(
+              ([k]) => !fieldError(k, v.fields[k]),
+            ).length;
+          openSheet(
+            "THE VOYAGE / YOUR IDEA",
+            v.lighthouse
+              ? "등대의 기록을\n조금 더 선명하게."
+              : "별을 향해,\n한 걸음 더 구체적으로.",
+            `<p class="sub">${esc(clip(v.goal.text, 170))}</p><div class="waypoints" aria-label="아이디어 구체화 항목">${planning.map(([k, label], i) => `<button class="waypoint ${k === q[0] ? "active" : ""} ${!fieldError(k, v.fields[k]) ? "done" : ""}" data-action="plan-field" data-field="${k}" aria-pressed="${k === q[0]}">${String(i + 1).padStart(2, "0")} ${label}</button>`).join("")}</div><span class="step-count">${count} / 6 WAYPOINTS</span><div class="plan-progress" aria-hidden="true"><span style="width:${(count / 6) * 100}%"></span></div><form id="plan-form" novalidate><label class="field-label" for="plan-answer">${q[1]}</label><textarea id="plan-answer" class="answer" maxlength="14000" placeholder="${q[2]}" data-field="${q[0]}" aria-describedby="field-error">${esc(v.fields[q[0]])}</textarea>${status()}${error()}<div class="actions"><button type="button" class="link" data-action="close">오늘은 여기까지</button><button class="btn" type="submit">${q[0] === "validation" ? "등대 준비 살펴보기" : "기록하고 다음으로"} ↗</button></div></form><div class="divider"></div><button class="btn ${completePlan(v) ? "gold" : "ghost"}" data-action="build-review">${v.lighthouse ? "등대 기록 갱신하기" : "등대를 세울 준비 확인하기"}</button>`,
+          );
+          const selected = document.querySelector(".waypoint.active");
+          selected?.scrollIntoView({ block: "nearest", inline: "center" });
+        }
+        function nextPlan() {
+          const el = $("plan-answer"),
+            k = el.dataset.field,
+            value = el.value.trim(),
+            err = fieldError(k, value);
+          if (err) {
+            $("field-error").textContent = err;
+            return;
+          }
+          if (
+            !save(() => {
+              current().fields[k] = value;
+              current().updated = Date.now();
+            })
+          )
+            return;
+          const next = planning.findIndex((x) => x[0] === k) + 1;
+          if (next < planning.length) showPlan(planning[next][0]);
+          else showBuildReview();
+        }
+        function showBuildReview() {
+          const v = current();
+          if (!v?.goal) return;
+          view = "build";
+          const missing = planning.filter(([k]) => fieldError(k, v.fields[k]));
+          openSheet(
+            "A LIGHT FOR YOUR IDEA",
+            missing.length
+              ? "조금 더 선명해지면,\n불을 밝힐 수 있어요."
+              : v.lighthouse
+                ? "당신의 등대를\n새로운 기록으로."
+                : "이 생각에,\n등대 하나를 세워 볼까요?",
+            `<p class="sub">등대는 구체화한 아이디어를 보관하는 곳이에요.<br>문제가 해결되었거나 사업이 성공했다는 뜻은 아니에요.</p>${planning.map(([k, label]) => `<section class="paper-section"><h3>${!fieldError(k, v.fields[k]) ? "✓" : "○"} ${label}</h3><p>${esc(v.fields[k] || "아직 남긴 생각이 없어요.")}</p><button class="link" data-action="plan-field" data-field="${k}">이 내용 다듬기</button></section>`).join("")}${missing.length ? `<p class="error">${missing.map((x) => x[1]).join(", ")}을 조금 더 구체적으로 적어 주세요.</p>` : '<label class="check-row"><input id="build-check" type="checkbox"><span>이 아이디어는 실제 검증이 필요한 계획이며, 계속 수정해 갈 수 있음을 이해해요.</span></label>'}<div class="actions"><button class="btn ghost" data-action="close">바다로 돌아가기</button><button id="build-button" class="btn gold" data-action="build" disabled>${v.lighthouse ? "등대 기록 갱신" : "나의 등대 세우기"}</button></div>`,
+          );
+        }
+        function build() {
+          const v = current();
+          if (!v?.goal || !completePlan(v) || !$("build-check")?.checked)
+            return;
+          if (
+            !save(() => {
+              current().lighthouse = {
+                builtAt: current().lighthouse?.builtAt || Date.now(),
+                updatedAt: Date.now(),
+                snapshot: JSON.parse(JSON.stringify(current().fields)),
+              };
+            })
+          )
+            return;
+          closeSheet();
+          syncWorld();
+          toast(
+            "등대에 불이 켜졌어요. 이제 현실에서 이 생각을 확인해 볼 차례예요.",
+          );
+        }
+        function showLighthouse() {
+          const v = current();
+          if (!v?.lighthouse) {
+            showBuildReview();
+            return;
+          }
+          view = "lighthouse";
+          openSheet(
+            "THE LIGHTHOUSE / IDEA ARCHIVE",
+            "다듬어 온 생각이\n빛나는 곳.",
+            `<p class="sub">${esc(v.goal.text)}</p><p class="demo-notice">이 등대는 구체화된 계획이에요. 실제 성과나 문제 해결을 보증하지 않으며, 검증을 통해 계속 바꿀 수 있어요.</p>${!completePlan(v) ? '<p class="error">지금은 일부 내용을 수정 중이에요. 마지막으로 완성한 등대 기록은 안전하게 보관되어 있어요.</p>' : ""}${planning.map(([k, label]) => `<section class="paper-section"><h3>${label}</h3><p>${esc(v.fields[k])}</p><button class="link" data-action="plan-field" data-field="${k}">수정하기</button></section>`).join("")}<div class="actions"><button class="btn ghost" data-action="close">바다로 돌아가기</button><button class="btn" data-action="city">비슷한 문제를 가진 도시로</button></div>`,
+          );
+        }
+        function showCity() {
+          if (!current()?.goal) {
+            toast("배에서 나만의 방향을 먼저 찾아 보세요.");
+            return;
+          }
+          view = "city";
+          const city = cities.find((c) => c.id === cityId) || cities[0];
+          openSheet(
+            "THE CITY / SHARED QUESTIONS",
+            "같은 문제를 품은\n사람들이 모인 곳.",
+            `<p class="demo-notice">도시 체험용 데모입니다. 아래 사람과 생각은 모두 가상이며, 제안은 이 기기에만 저장돼요. 실제 다른 사용자에게 전송되지 않아요.</p><div class="city-tabs">${cities.map((c) => `<button class="${c.id === city.id ? "active" : ""}" data-action="city-tab" data-city="${c.id}" aria-pressed="${c.id === city.id}">${c.name}</button>`).join("")}</div><div class="context">${city.problem}</div><p class="sub">아직 해결하지 못했어도, 같은 질문이 있으면 도시가 돼요.<br>이곳에는 3개의 가상 생각이 모여 있어요.</p>${city.people.map((person) => `<article class="person"><h3><span class="avatar">${person.name}</span>${person.name}<small>가상 인물 · 데모</small></h3><p>${person.thought}</p><span class="status">○ 아직 해결되지 않은 문제</span><div class="actions"><button class="link" data-action="invite" data-person="${person.id}">${state.proposals.some((p) => p.personId === person.id) ? "저장한 데모 제안 보기" : "함께 항해 제안하기"}</button><button class="link" data-action="demo-crew" data-person="${person.id}">같은 배로 도전하는 모습 체험</button></div></article>`).join("")}<div class="divider"></div><div class="actions"><button class="btn ghost" data-action="solo">혼자 항해 이어가기</button><button class="btn" data-action="new-city-boat">이 문제로 새 배 만들기 ↗</button></div>`,
+          );
+        }
+        function findPerson(pid) {
+          for (const c of cities) {
+            const p = c.people.find((p) => p.id === pid);
+            if (p) return { city: c, person: p };
+          }
+          return null;
+        }
+        function showInvite(pid) {
+          const found = findPerson(pid);
+          if (!found) return;
+          invitePerson = pid;
+          view = "invite";
+          const saved = state.proposals.find((p) => p.personId === pid);
+          openSheet(
+            "AN INVITATION / LOCAL DEMO",
+            `${found.person.name}에게,\n같은 질문을 건네 볼까요?`,
+            `<p class="demo-notice">가상 인물에게 쓰는 데모 제안입니다. 실제로 전송되거나 답장이 오지 않습니다.</p><div class="context">${found.person.thought}</div><label class="field-label" for="invite-answer">함께 도전하고 싶은 문제와 제안</label><textarea id="invite-answer" class="answer" maxlength="2000" placeholder="나도 비슷한 문제를 겪고 있어요. 이런 작은 시도를 같이 해보면 어떨까요?">${esc(saved?.body || "")}</textarea>${error()}<div class="actions"><button class="btn ghost" data-action="city">도시로 돌아가기</button><button class="btn" data-action="save-invite">이 기기에 데모 제안 저장</button></div>`,
+          );
+        }
+        function showCrew(pid) {
+          const found = findPerson(pid);
+          if (!found) return;
+          invitePerson = pid;
+          view = "crew";
+          openSheet(
+            "ON THE SAME BOAT / DEMO",
+            "혼자보다,\n함께라는 가능성.",
+            `<p class="demo-notice">${found.person.name}은 가상 동승자예요. 아래 선택은 함께 타는 화면을 체험하는 것이며, 실제 협업 참여나 초대 수락이 아닙니다.</p><div class="context">함께 품은 문제<br>${found.city.problem}</div><p class="sub">기존 생각과 목표는 유지한 채, 배에 데모 동승 표시가 생겨요. 언제든 혼자 항해로 돌아올 수 있어요.</p><div class="actions"><button class="btn ghost" data-action="city">도시로 돌아가기</button><button class="btn" data-action="join-demo">데모 동승 체험하기</button></div>`,
+          );
+        }
+        function showLog() {
+          view = "log";
+          openSheet(
+            "THE LOGBOOK / YOUR VOYAGES",
+            "지나온 생각도,\n다시 출발할 생각도.",
+            `${
+              state.voyages.length
+                ? state.voyages
+                    .slice()
+                    .sort((a, b) => b.updated - a.updated)
+                    .map(
+                      (v) =>
+                        `<article class="log-item"><button class="log-open" data-action="select-voyage" data-id="${esc(v.id)}">${esc(clip(v.goal?.text || v.idea || "아직 이름 없는 생각", 100))}<small>${v.lighthouse ? "등대가 있는 항해" : v.goal ? "북극성을 찾은 항해" : "방향을 찾는 중"}${v.id === state.activeId ? " · 지금 타고 있는 배" : ""}${v.crew.length ? " · 데모 동승" : ""}</small></button><button class="link" data-action="delete-voyage" data-id="${esc(v.id)}">이 항해 삭제</button></article>`,
+                    )
+                    .join("")
+                : '<p class="empty">아직 떠난 항해가 없어요.<br>바다의 작은 배에서 시작할 수 있어요.</p>'
+            }<div class="actions"><button class="btn ghost" data-action="close">바다로 돌아가기</button><button class="btn" data-action="new-voyage">새로운 배 띄우기 ↗</button></div><button class="link" data-action="legacy">이전 기록 보관함 열기</button>`,
+          );
+        }
+        function showSettings() {
+          view = "settings";
+          openSheet(
+            "A QUIET CORNER / YOUR STORAGE",
+            "바다를,\n나의 속도로.",
+            `<label class="settings-row"><span>잔잔하게 멈추기<br><small class="sub">별과 파도의 움직임을 줄여요.</small></span><input id="motion-setting" type="checkbox" ${isStill() ? "checked" : ""} ${motionQuery.matches ? "disabled" : ""}></label>${motionQuery.matches ? '<p class="sub">기기의 동작 줄이기 설정을 따르고 있어요.</p>' : ""}<section class="paper-section"><h3>이 브라우저의 항해 기록</h3><p>계정이나 AI API 없이 작동해요. 기록은 이 주소의 브라우저에만 남고, 다른 기기와 동기화되지 않아요. 이전 Moru 기록은 읽기 전용 보관함에서 확인할 수 있어요. 원본을 수정하거나 삭제하지 않아요.</p><div class="actions"><button class="btn ghost" data-action="backup">${blocked ? "저장 원문 백업" : "항해 백업 저장"}</button><button class="btn ghost" data-action="restore" ${blocked ? "disabled" : ""}>바다 백업 불러오기</button></div></section><section class="paper-section"><h3>이 바다의 약속</h3><p>별은 가능성, 북극성은 내가 확인한 문제 해결 목표, 등대는 다듬은 해결 아이디어예요. 도시는 해결 여부와 관계없이 같은 문제를 가진 사람들이 모이는 공간이에요.</p></section><section class="paper-section"><h3>프로토타입 안내</h3><p>질문과 목표 후보는 문장 규칙과 입력한 내용을 바탕으로 안내해요. 도시의 사람·협업은 구분된 가상 데이터로만 체험합니다. 실제 초대 전송이나 다중 사용자 협업 기능은 없어요.</p></section><button class="link" data-action="legacy">이전 기록 보관함 열기</button><br><button class="link" data-action="log">나의 항해 일지 열기</button>`,
+          );
+        }
+        function backup() {
+          let body = blocked ? disk : JSON.stringify(state, null, 2);
+          if (body === null) body = "";
+          const a = document.createElement("a"),
+            url = URL.createObjectURL(
+              new Blob([body], { type: "application/json" }),
+            );
+          a.href = url;
+          a.download = `moru-ocean-${blocked ? "recovery-" : ""}${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.append(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 3000);
+          toast(
+            blocked
+              ? "보관된 원문을 복구용으로 내려받았어요."
+              : "항해 백업을 내려받았어요.",
+          );
+        }
+        $("restore-file").addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file) return;
+          try {
+            if (file.size > 10e6)
+              throw Error("10MB 이하의 파일을 선택해 주세요.");
+            const incoming = validateState(JSON.parse(await file.text()));
+            const existing = new Set(state.voyages.map((v) => v.id)),
+              add = incoming.voyages.filter((v) => !existing.has(v.id));
+            if (state.voyages.length + add.length > 100)
+              throw Error("항해는 최대 100개까지 보관할 수 있어요.");
+            if (
+              !confirm(
+                `${add.length}개의 새 항해를 추가할까요? 같은 ID의 기존 기록은 그대로 유지합니다.`,
+              )
+            )
+              return;
+            if (
+              save(() => {
+                state.voyages.push(...add);
+                if (!state.activeId && state.voyages.length)
+                  state.activeId = state.voyages[0].id;
+                for (const p of incoming.proposals)
+                  if (
+                    !state.proposals.some(
+                      (x) => x.personId === p.personId && x.cityId === p.cityId,
+                    )
+                  )
+                    state.proposals.push(p);
+              })
+            ) {
+              closeSheet();
+              syncWorld();
+              toast(`${add.length}개의 항해를 가져왔어요.`);
+            }
+          } catch (err) {
+            toast("복원하지 못했어요. " + err.message);
+          }
+        });
+        function syncWorld() {
+          const v = current(),
+            started = !!v?.idea,
+            goal = !!v?.goal;
+          $("intro").hidden = started;
+          $("log-button").hidden = !state.voyages.length;
+          $("map-button").hidden = !v || !routeFor(v);
+          $("start-hint").hidden = started;
+          $("foot-left").textContent = goal
+            ? "FOLLOW YOUR OWN NORTH"
+            : started
+              ? "A DIRECTION IS TAKING SHAPE"
+              : "A QUIET PLACE TO BEGIN";
+          $("foot-right").textContent = v?.crew.length
+            ? "WITH A DEMO COMPANION"
+            : "YOUR OWN PACE, YOUR OWN NORTH.";
+          document.body.classList.toggle("voyaging", goal);
+          $("north").hidden = !goal;
+          $("north").classList.toggle("visible", goal);
+          $("north").setAttribute(
+            "aria-label",
+            goal ? "나의 북극성: " + v.goal.text : "북극성",
+          );
+          $("city").hidden = !goal;
+          $("lighthouse").hidden = !v?.lighthouse;
+          $("crew-label").hidden = !v?.crew.length;
+          $("boat").setAttribute(
+            "aria-label",
+            goal
+              ? "나의 배: 아이디어 항해 이어가기"
+              : "작은 배를 눌러 첫 항해 시작",
+          );
+          $("voyage-title").hidden = !started;
+          $("voyage-title").innerHTML = started
+            ? `<small>${goal ? "YOUR NORTH STAR" : "A THOUGHT, ON ITS WAY"}</small><p>${esc(clip(goal ? v.goal.text : v.idea, 100))}</p>`
+            : "";
+          setSaveStatus();
+          document.body.classList.toggle("still", isStill());
+          renderOnce();
+        }
+        function doAction(action, button) {
+          switch (action) {
+            case "home":
+              if ($("sheet").open) closeSheet();
+              $("discovery").hidden = true;
+              $("world").inert = false;
+              syncWorld();
+              break;
+            case "chart":
+              if (!current() && !makeVoyage()) return;
+              showChart();
+              break;
+            case "chart-resume":
+              start();
+              break;
+            case "choose-entry":
+              chooseEntry(button.dataset.entry);
+              break;
+            case "legacy":
+              showLegacy();
+              break;
+            case "legacy-open":
+              showLegacyNote(
+                button.dataset.source,
+                Number(button.dataset.index),
+              );
+              break;
+            case "legacy-sail":
+              importLegacy(button.dataset.source, Number(button.dataset.index));
+              break;
+            case "legacy-backup":
+              backupLegacy();
+              break;
+            case "voyage-archive":
+              showVoyageArchive();
+              break;
+            case "boat":
+              start();
+              break;
+            case "close":
+              closeSheet();
+              break;
+            case "settings":
+              showSettings();
+              break;
+            case "log":
+              showLog();
+              break;
+            case "question-back":
+              if (
+                save(
+                  () =>
+                    (current().step =
+                      routeFor(current()) === "problem" && current().step === 2
+                        ? 0
+                        : Math.max(0, current().step - 1)),
+                )
+              )
+                showQuestion();
+              break;
+            case "goal-back":
+              if (
+                save(
+                  () =>
+                    (current().step =
+                      routeFor(current()) === "problem" ? 0 : 1),
+                )
+              )
+                showQuestion();
+              break;
+            case "approve-goal":
+              approveGoal();
+              break;
+            case "goal":
+              showGoal();
+              break;
+            case "continue":
+              $("discovery").hidden = true;
+              $("world").inert = false;
+              showPlan();
+              break;
+            case "plan-field":
+              showPlan(button.dataset.field);
+              break;
+            case "build-review":
+              showBuildReview();
+              break;
+            case "build":
+              build();
+              break;
+            case "lighthouse":
+              showLighthouse();
+              break;
+            case "city":
+              showCity();
+              break;
+            case "city-tab":
+              cityId = button.dataset.city;
+              showCity();
+              break;
+            case "invite":
+              showInvite(button.dataset.person);
+              break;
+            case "demo-crew":
+              showCrew(button.dataset.person);
+              break;
+            case "save-invite": {
+              const body = $("invite-answer").value.trim();
+              if (!meaningful(body, 8)) {
+                $("field-error").textContent =
+                  "함께 도전하고 싶은 내용을 한 문장으로 남겨 주세요.";
+                return;
+              }
+              const found = findPerson(invitePerson);
+              if (
+                save(() => {
+                  const old = state.proposals.find(
+                    (p) => p.personId === invitePerson,
+                  );
+                  if (old) old.body = body;
+                  else
+                    state.proposals.push({
+                      personId: invitePerson,
+                      cityId: found.city.id,
+                      body,
+                      created: Date.now(),
+                    });
+                })
+              ) {
+                showCity();
+                toast(
+                  "데모 제안을 이 기기에 저장했어요. 실제 전송은 하지 않았어요.",
+                );
+              }
+              break;
+            }
+            case "join-demo":
+              if (save(() => (current().crew = [invitePerson]))) {
+                closeSheet();
+                syncWorld();
+                toast(
+                  "가상 동승자와 같은 배를 타는 모습이에요. 실제 협업은 아니에요.",
+                );
+              }
+              break;
+            case "solo":
+              if (save(() => (current().crew = []))) {
+                closeSheet();
+                syncWorld();
+                toast("나만의 속도로 항해를 이어갑니다.");
+              }
+              break;
+            case "new-city-boat": {
+              const city = cities.find((c) => c.id === cityId);
+              if (makeVoyage(city.problem, city.id)) {
+                syncWorld();
+                showChart();
+              }
+              break;
+            }
+            case "new-voyage":
+              if (makeVoyage()) {
+                syncWorld();
+                showChart();
+              }
+              break;
+            case "select-voyage":
+              if (save(() => (state.activeId = button.dataset.id))) {
+                closeSheet();
+                syncWorld();
+                start();
+              }
+              break;
+            case "delete-voyage":
+              if (
+                confirm(
+                  "이 항해와 목표·등대 기록을 삭제할까요? 다른 항해와 기존 Moru 기록은 유지합니다.",
+                )
+              ) {
+                if (
+                  save(() => {
+                    state.voyages = state.voyages.filter(
+                      (v) => v.id !== button.dataset.id,
+                    );
+                    if (state.activeId === button.dataset.id)
+                      state.activeId = state.voyages[0]?.id || null;
+                  })
+                ) {
+                  syncWorld();
+                  showLog();
+                }
+              }
+              break;
+            case "backup":
+              backup();
+              break;
+            case "restore":
+              $("restore-file").value = "";
+              $("restore-file").click();
+              break;
+          }
+        }
+        document.addEventListener("click", (e) => {
+          const button = e.target.closest("[data-action]");
+          if (button && !button.disabled)
+            doAction(button.dataset.action, button);
+        });
+        document.addEventListener("keydown", (e) => {
+          if (!$("discovery").hidden) {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              $("discovery").querySelector("button").focus();
+            }
+            if (e.key === "Escape") {
+              e.preventDefault();
+              $("discovery").hidden = true;
+              $("world").inert = false;
+              $("north").focus({ preventScroll: true });
+            }
+          }
+        });
+        document.addEventListener("submit", (e) => {
+          if (e.target.id === "question-form") {
+            e.preventDefault();
+            answerQuestion();
+          }
+          if (e.target.id === "plan-form") {
+            e.preventDefault();
+            nextPlan();
+          }
+        });
+        document.addEventListener("input", (e) => {
+          if (e.target.id === "thought-answer") {
+            const value = e.target.value;
+            save(() => {
+              const v = current();
+              const key = questionFor(v).key;
+              if (key === "idea") v.idea = value;
+              else v.fields[key] = value;
+              v.updated = Date.now();
+            });
+          }
+          if (e.target.id === "plan-answer") {
+            const value = e.target.value,
+              k = e.target.dataset.field;
+            save(() => {
+              current().fields[k] = value;
+              current().updated = Date.now();
+            });
+          }
+          if (e.target.id === "goal-text") {
+            goalDraft = e.target.value;
+            save(() => {
+              current().goalDraft = goalDraft;
+            });
+            const approve = $("approve-goal");
+            if (approve)
+              approve.disabled = !(
+                checks.every(Boolean) &&
+                clearCore(current()) &&
+                meaningful(goalDraft, 8)
+              );
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.matches("[data-goal-check]")) {
+            checks[Number(e.target.dataset.goalCheck)] = e.target.checked;
+            $("approve-goal").disabled = !(
+              checks.every(Boolean) &&
+              clearCore(current()) &&
+              meaningful($("goal-text").value, 8)
+            );
+          }
+          if (e.target.id === "build-check")
+            $("build-button").disabled = !e.target.checked;
+          if (e.target.id === "motion-setting") {
+            if (save(() => (state.settings.still = e.target.checked))) {
+              syncWorld();
+              startAnimation();
+            }
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === KEY && e.newValue !== disk) {
+            blocked = true;
+            storeError =
+              "다른 탭에서 항해가 바뀌었어요. 작성 중인 내용을 복사한 뒤 새로고침해 주세요.";
+            setSaveStatus();
+            toast(storeError);
+          }
+        });
+        // Cinematic scene: a capped pixel ratio and 24fps canvas; no assets, requests, or audio.
+        const canvas = $("ocean"),
+          ctx = canvas.getContext("2d"),
+          motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
+        let width = innerWidth,
+          height = innerHeight,
+          stars = [],
+          raf = 0,
+          lastFrame = 0,
+          northBloom = -1,
+          pointer = { x: 0, y: 0 },
+          ripple = null;
+        function isStill() {
+          return motionQuery.matches || state.settings.still;
+        }
+        let seed = 7197;
+        function random() {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        }
+        function resize() {
+          width = innerWidth;
+          height = innerHeight;
+          const ratio = Math.min(devicePixelRatio || 1, 1.7);
+          canvas.width = Math.round(width * ratio);
+          canvas.height = Math.round(height * ratio);
+          canvas.style.width = width + "px";
+          canvas.style.height = height + "px";
+          ctx?.setTransform(ratio, 0, 0, ratio, 0, 0);
+          seed = 7197;
+          stars = Array.from({ length: width < 650 ? 125 : 260 }, () => ({
+            x: random() * width,
+            y: random() * height * 0.49,
+            r: 0.35 + random() * 1.05,
+            phase: random() * Math.PI * 2,
+            light: 0.12 + random() * 0.65,
+          }));
+          renderOnce();
+        }
+        function draw(now) {
+          if (!ctx) return;
+          const t = isStill() ? 0 : now * 0.00012;
+          const sky = ctx.createLinearGradient(0, 0, 0, height);
+          sky.addColorStop(0, "#030a14");
+          sky.addColorStop(0.35, "#0a1929");
+          sky.addColorStop(0.49, "#182f3c");
+          sky.addColorStop(0.505, "#102734");
+          sky.addColorStop(0.63, "#091b29");
+          sky.addColorStop(1, "#030d18");
+          ctx.fillStyle = sky;
+          ctx.fillRect(0, 0, width, height);
+          const haze = ctx.createRadialGradient(
+            width * 0.63,
+            height * 0.46,
+            2,
+            width * 0.63,
+            height * 0.46,
+            width * 0.55,
+          );
+          haze.addColorStop(0, "#8eaaa91e");
+          haze.addColorStop(0.4, "#5c8c9a0a");
+          haze.addColorStop(1, "#1a415300");
+          ctx.fillStyle = haze;
+          ctx.fillRect(0, 0, width, height * 0.58);
+          const nebula = ctx.createRadialGradient(
+            width * 0.72,
+            height * 0.2,
+            2,
+            width * 0.72,
+            height * 0.2,
+            width * 0.36,
+          );
+          nebula.addColorStop(0, "#5361780d");
+          nebula.addColorStop(1, "#2a254000");
+          ctx.fillStyle = nebula;
+          ctx.fillRect(0, 0, width, height * 0.5);
+          for (const s of stars) {
+            const alpha = s.light * (0.72 + 0.28 * Math.sin(t * 2 + s.phase)),
+              x = s.x + pointer.x * (s.r * 0.35),
+              y = s.y + pointer.y * 0.12;
+            ctx.fillStyle = `rgba(199,218,223,${alpha})`;
+            ctx.beginPath();
+            ctx.arc(x, y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+            if (s.r > 1.26) {
+              ctx.strokeStyle = `rgba(203,223,226,${alpha * 0.27})`;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(x - 3, y);
+              ctx.lineTo(x + 3, y);
+              ctx.moveTo(x, y - 3);
+              ctx.lineTo(x, y + 3);
+              ctx.stroke();
+            }
+          }
+          // The horizon is a long, broken breath of light, never a hard dividing line.
+          ctx.strokeStyle = "#76989d12";
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(0, height * 0.503);
+          for (let x = 0; x < width; x += 30)
+            ctx.lineTo(x, height * 0.503 + Math.sin(x * 0.008 + t) * 1.5);
+          ctx.stroke();
+          for (let row = 0; row < 70; row++) {
+            const depth = row / 70,
+              y = height * (0.51 + 0.49 * depth * depth),
+              amplitude = 0.25 + depth * 3.4;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(97,145,163,${0.035 + depth * 0.045})`;
+            ctx.lineWidth = 0.45 + depth * 0.4;
+            for (let x = -25; x <= width + 25; x += 16) {
+              const wave =
+                Math.sin(x * 0.011 + t * (2 + depth) + row * 1.7) * amplitude +
+                Math.sin(x * 0.025 - t * 1.4 + row) * amplitude * 0.3;
+              const gap =
+                Math.sin(x * 0.019 + row * 2.13 + t * 0.2) +
+                  Math.sin(x * 0.031 - row * 1.71) >
+                0.43;
+              if (x === -25 || gap) ctx.moveTo(x, y + wave);
+              else ctx.lineTo(x, y + wave);
+            }
+            ctx.stroke();
+          }
+          for (let row = 0; row < 44; row++) {
+            const d = row / 44,
+              y = height * (0.52 + 0.47 * d),
+              span = width * (0.03 + d * 0.14),
+              cx = width * (0.62 + Math.sin(row * 8.1 + t) * 0.025);
+            ctx.strokeStyle = `rgba(120,160,168,${0.016 + 0.065 * (1 - d)})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(cx - span * 0.5, y);
+            ctx.lineTo(cx + span * 0.5, y);
+            ctx.stroke();
+          }
+          const v = current(),
+            anchors = [
+              [0.22, 0.31],
+              [0.34, 0.22],
+              [0.48, 0.29],
+              [0.61, 0.24],
+              width < 650 ? [0.73, 0.23] : [0.72, 0.2],
+            ];
+          const progress = v ? (v.goal ? 5 : Math.min(4, v.step)) : 0;
+          if (progress > 0) {
+            ctx.strokeStyle = "#a9c6c536";
+            ctx.lineWidth = 0.8;
+            ctx.setLineDash([2, 7]);
+            ctx.beginPath();
+            for (let i = 0; i < progress; i++) {
+              const a = anchors[i];
+              if (i === 0) ctx.moveTo(width * a[0], height * a[1]);
+              else ctx.lineTo(width * a[0], height * a[1]);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            for (let i = 0; i < progress; i++) {
+              const a = anchors[i];
+              ctx.fillStyle = "#c5d6cd";
+              ctx.beginPath();
+              ctx.arc(width * a[0], height * a[1], 1.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          if (v?.goal) {
+            const x = width * (width < 650 ? 0.73 : 0.72),
+              y = height * (width < 650 ? 0.23 : 0.2),
+              g = ctx.createRadialGradient(x, y, 0, x, y, 70);
+            g.addColorStop(0, "#f1dfa732");
+            g.addColorStop(0.3, "#d6ce9820");
+            g.addColorStop(1, "#c7daba00");
+            ctx.fillStyle = g;
+            ctx.fillRect(x - 70, y - 70, 140, 140);
+            if (northBloom >= 0 && now - northBloom < 4500 && !isStill()) {
+              const phase = (now - northBloom) / 4500;
+              ctx.strokeStyle = `rgba(226,216,179,${(1 - phase) * 0.25})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.arc(x, y, 15 + phase * 220, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          }
+          if (ripple && !isStill()) {
+            const a = (now - ripple.time) / 1800;
+            if (a < 1) {
+              ctx.strokeStyle = `rgba(137,176,186,${(1 - a) * 0.15})`;
+              ctx.beginPath();
+              ctx.ellipse(
+                ripple.x,
+                ripple.y,
+                15 + a * 65,
+                2 + a * 10,
+                0,
+                0,
+                Math.PI * 2,
+              );
+              ctx.stroke();
+            } else ripple = null;
+          }
+        }
+        function renderOnce() {
+          draw(performance.now());
+        }
+        function tick(now) {
+          if (document.hidden || isStill()) {
+            raf = 0;
+            return;
+          }
+          if (now - lastFrame > 41) {
+            draw(now);
+            lastFrame = now;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+        function startAnimation() {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          if (!document.hidden && !isStill()) raf = requestAnimationFrame(tick);
+          else renderOnce();
+        }
+        window.addEventListener("resize", resize);
+        document.addEventListener("visibilitychange", startAnimation);
+        motionQuery.addEventListener("change", () => {
+          syncWorld();
+          startAnimation();
+        });
+        canvas.addEventListener("pointermove", (e) => {
+          if (e.pointerType === "mouse" && !isStill()) {
+            pointer.x = (e.clientX / width - 0.5) * 12;
+            pointer.y = (e.clientY / height - 0.5) * 8;
+          }
+        });
+        canvas.addEventListener("pointerdown", (e) => {
+          if (e.clientY > height * 0.51) {
+            ripple = { x: e.clientX, y: e.clientY, time: performance.now() };
+            if (isStill())
+              toast("작은 배를 눌러, 떠오르는 생각을 실어 보세요.");
+          }
+        });
+        const entryRoutes = {
+          drift: {
+            label: "아직 막연해요",
+            subtitle: "어디로 갈지 몰라도 괜찮아요.",
+            prompt: "요즘 마음에 걸리는 일 하나부터 시작해요.",
+            key: "idea",
+            title: "지금 떠오르는\n생각이 있나요?",
+            placeholder:
+              "요즘 마음에 걸리는 일, 바꾸고 싶은 것, 문득 스친 생각…",
+          },
+          problem: {
+            label: "풀고 싶은 문제가 있어요",
+            subtitle: "이미 발견한 문제에서 출발해요.",
+            prompt: "누가, 어떤 순간에 겪는 문제인지 살펴봐요.",
+            key: "problem",
+            title: "풀고 싶은 문제는\n어떤 순간에 생기나요?",
+            placeholder:
+              "예: 여러 곳에 흩어진 일정 때문에 매일 무엇부터 할지 결정하는 데 시간이 걸려요.",
+          },
+          idea: {
+            label: "해보고 싶은 아이디어가 있어요",
+            subtitle: "떠올린 방법을 배에 실어 봐요.",
+            prompt: "그 방법이 누구의 무엇을 바꿀지 찾아봐요.",
+            key: "solution",
+            title: "해보고 싶은 아이디어를\n들려주시겠어요?",
+            placeholder:
+              "예: 아침마다 오늘 할 일 하나만 골라 보여주는 작은 도구를 만들고 싶어요.",
+          },
+        };
+        function routeFor(v) {
+          if (!v) return null;
+          if (Object.prototype.hasOwnProperty.call(v, "entryPoint"))
+            return entryRoutes[v.entryPoint] ? v.entryPoint : null;
+          return v.idea || v.step > 0 || v.goal ? "drift" : null;
+        }
+        function questionFor(v) {
+          const route = entryRoutes[routeFor(v)] || entryRoutes.drift;
+          if (v.step === 0)
+            return {
+              ...route,
+              value:
+                route.key === "idea"
+                  ? v.idea
+                  : v.fields[route.key] ||
+                    (route.key === "solution" ? v.idea : ""),
+              hint: route.subtitle + " " + route.prompt,
+            };
+          const q = core[v.step - 1];
+          return {
+            key: q[0],
+            title:
+              routeFor(v) === "idea" && v.step === 1
+                ? "그 아이디어로 어떤\n불편을 바꾸고 싶나요?"
+                : q[1],
+            placeholder: q[2],
+            hint: q[3],
+            value: v.fields[q[0]],
+          };
+        }
+        function chartDrawing(v) {
+          const facts = [
+            !!v.idea,
+            !!v.fields.problem && !fieldError("problem", v.fields.problem),
+            !!v.fields.audience && !fieldError("audience", v.fields.audience),
+            !!v.fields.change && !fieldError("change", v.fields.change),
+            !!v.goal,
+          ];
+          const points = [
+              [39, 128],
+              [124, 105],
+              [211, 126],
+              [295, 77],
+              [393, 47],
+            ],
+            count = facts.filter(Boolean).length,
+            poly = points
+              .slice(0, Math.max(1, count))
+              .map((p) => p.join(","))
+              .join(" ");
+          return `<div class="chart-drawing"><svg viewBox="0 0 440 192" aria-hidden="true"><defs><radialGradient id="chart-glow"><stop stop-color="#c2d2bf" stop-opacity=".15"/><stop offset="1" stop-color="#9fbab9" stop-opacity="0"/></radialGradient></defs><path class="chart-contour" d="M-20 49Q73-20 139 35T303 7T450 45M-25 62Q73-7 136 48T302 21T460 60M-30 76Q73 7 131 61T306 36T460 75M280 210Q337 116 441 150M290 222Q344 130 459 161M303 233Q357 143 474 174"/><circle cx="${points[Math.max(0, count - 1)][0]}" cy="${points[Math.max(0, count - 1)][1]}" r="52" fill="url(#chart-glow)"/><polyline class="chart-unread" points="39,128 124,105 211,126 295,77 393,47"/><polyline class="chart-read" points="${poly}"/><path class="chart-side-path" d="M211 126Q245 177 340 169"/>${points.map(([x, y], i) => `<circle class="${i < count ? "chart-known" : "chart-unknown"}" cx="${x}" cy="${y}" r="${i === 0 ? 5 : 3}"/>`).join("")}<path d="m30 117 8-16 1 15m-13 4q13 5 24-1l-4 7H31Z" fill="#bdcfc5"/><text x="17" y="153">출발한 생각</text><text x="96" y="89">문제의 단서</text><text x="266" y="60">원하는 변화</text><text x="353" y="30" class="${v.goal ? "chart-destination" : ""}">${v.goal ? "나의 북극성" : "아직 열린 방향"}</text><text x="309" y="188">같은 문제의 도시</text><path d="m329 167v-12h7v12m2 0v-18h7v18m3 0v-10h7v10" stroke="#b9b48f" fill="none" opacity=".65"/>${v.goal ? '<path d="m393 35 3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" fill="#ddc68f"/>' : ""}<path d="M403 139v25m-12-12h24m-19-8 14 16m0-16-14 16" stroke="#8ea8ad" opacity=".3"/><text x="399" y="134">N</text></svg></div>`;
+        }
+        function showChart() {
+          const v = current();
+          if (!v) return;
+          view = "chart";
+          const route = routeFor(v),
+            begun = !!route || !!v.goal;
+          openSheet(
+            "THE VOYAGE CHART / YOUR STARTING POINT",
+            v.goal
+              ? "내가 찾은 방향,\n앞으로 펼쳐질 항로."
+              : "항해지도를\n펼쳐볼까요?",
+            `<div class="voyage-map">${chartDrawing(v)}<p class="chart-invitation">${v.goal ? "지금까지 남긴 생각이 항로가 되었어요. 다음에 살펴볼 곳을 골라 보세요." : "목적지가 아직 없어도 괜찮아요.<br>지금 있는 곳부터, 함께 지도에 남겨볼까요?"}</p>${
+              v.goal
+                ? `<div class="chart-current"><span>내가 정한 북극성</span><p>${esc(v.goal.text)}</p></div><div class="actions"><button class="btn" data-action="chart-resume">${v.lighthouse ? "등대의 기록 열기" : "아이디어 구체화 이어가기"} ↗</button><button class="btn ghost" data-action="goal">북극성 다시 살펴보기</button><button class="link" data-action="city">같은 문제의 도시 둘러보기 · 데모</button></div>`
+                : `${begun ? `<div class="chart-current"><span>지금의 출발 위치 · ${entryRoutes[route]?.label || "방향을 찾는 중"}</span><p>${esc(clip(v.idea || v.fields.problem || v.fields.solution || "아직 이름 없는 항해", 120))}</p><button class="link" data-action="chart-resume">남긴 생각에서 이어가기 ↗</button></div>` : ""}<h3 class="chart-question">${begun ? "다른 위치에서 다시 살펴볼까요?" : "지금, 당신의 생각은 어디쯤 있나요?"}</h3><div class="entry-choices">${Object.entries(
+                    entryRoutes,
+                  )
+                    .map(
+                      ([key, item], i) =>
+                        `<button class="entry-choice ${route === key ? "selected" : ""}" data-action="choose-entry" data-entry="${key}" aria-pressed="${route === key}"><span class="entry-buoy">0${i + 1}</span><span><strong>${item.label}</strong><small>${item.prompt}</small></span><span class="entry-arrow" aria-hidden="true">↗</span></button>`,
+                    )
+                    .join(
+                      "",
+                    )}</div><p class="chart-footnote">어디서 시작해도 괜찮아요. 위치를 바꿔도 남긴 내용은 지우지 않아요.</p>`
+            }${v.legacy ? '<button class="link" data-action="voyage-archive">이 항해에 보관된 이전 기록 열기</button>' : ""}</div>`,
+          );
+        }
+        function chooseEntry(key) {
+          if (!entryRoutes[key] || current()?.goal) return;
+          if (
+            save(() => {
+              current().entryPoint = key;
+              current().step = 0;
+              current().updated = Date.now();
+            })
+          ) {
+            syncWorld();
+            showQuestion();
+          }
+        }
+        const legacyKeys = [
+          "moru_v11_data",
+          "moru_v10_data",
+          "moru_v9_data",
+          "moru_v8_data",
+          "moru_v7_data",
+          "moru_v6_notes",
+        ];
+        function legacyRecords() {
+          const sources = [],
+            errors = [];
+          for (const key of legacyKeys) {
+            let raw;
+            try {
+              raw = localStorage.getItem(key);
+              if (raw === null) continue;
+              const data = JSON.parse(raw),
+                notes = Array.isArray(data) ? data : data?.notes;
+              if (!Array.isArray(notes)) throw Error();
+              sources.push({ key, raw, notes });
+            } catch {
+              if (raw !== null && raw !== undefined) errors.push(key);
+            }
+          }
+          return { sources, errors };
+        }
+        function showLegacy() {
+          view = "legacy";
+          const { sources, errors } = legacyRecords();
+          openSheet(
+            "PREVIOUS VOYAGES / READ-ONLY ARCHIVE",
+            "이전 생각도,\n다시 항해할 수 있어요.",
+            `<p class="sub">이전 기록은 원문 그대로 보관되어 있어요. 먼저 열어 보고, 원하는 생각만 새 배로 이어갈 수 있어요.</p>${sources.map(({ key, notes }) => `<section class="paper-section"><h3>이전 기록 · ${esc(key.replace("moru_", "").replace("_data", "").replace("_notes", ""))}</h3>${notes.map((n, i) => `<button class="log-open" data-action="legacy-open" data-source="${key}" data-index="${i}">${esc(clip(String(n?.body ?? n?.text ?? n?.content ?? n?.title ?? "내용 확인하기"), 110))}<small>원본 보기 · 읽기 전용</small></button>`).join("")}</section>`).join("")}${!sources.length ? '<p class="empty">이 브라우저에 이전 기록이 없어요.<br>새 항해를 시작하면 이 바다에 남길 수 있어요.</p>' : ""}${errors.length ? '<p class="error">일부 이전 데이터를 읽지 못했어요. 원문은 변경하지 않았으며, 아래에서 백업할 수 있어요.</p>' : ""}<div class="actions"><button class="btn ghost" data-action="legacy-backup">이전 데이터 원문 백업</button><button class="btn" data-action="log">항해 일지로 돌아가기</button></div>`,
+          );
+        }
+        function archiveText(note) {
+          const n =
+              note && typeof note === "object"
+                ? note
+                : { body: String(note ?? "") },
+            body = String(n.body ?? n.text ?? n.content ?? ""),
+            fields = n.fields && typeof n.fields === "object" ? n.fields : {},
+            entries = Array.isArray(n.entries)
+              ? n.entries
+              : Array.isArray(n.growth)
+                ? n.growth
+                : [],
+            exps = Array.isArray(n.experiments) ? n.experiments : [];
+          return `<div class="context">${esc(body)}</div>${n.originalBody && n.originalBody !== body ? `<details class="paper-section"><summary>처음 남긴 원본</summary><p>${esc(n.originalBody)}</p></details>` : ""}${[
+            ["문제", fields.problem],
+            ["대상", fields.who || fields.audience],
+            ["해결 방법", fields.solution || fields.proposal],
+            ["다른 점", fields.difference || fields.edge],
+            ["남긴 결론", n.takeaway],
+          ]
+            .filter((x) => x[1])
+            .map(
+              ([label, value]) =>
+                `<section class="paper-section"><h3>${label}</h3><p>${esc(value)}</p></section>`,
+            )
+            .join(
+              "",
+            )}${entries.length ? `<section class="paper-section"><h3>이어서 남긴 생각</h3>${entries.map((e) => `<p>${esc(e?.label || "이어진 생각")}<br>${esc(e?.body || e?.text || "")}</p>`).join("<br>")}</section>` : ""}${exps.length ? `<section class="paper-section"><h3>이전 실험과 배움</h3>${exps.map((e) => `<h3>${esc(e?.title || "실험 기록")}</h3><p>${[e?.hypothesis, e?.method, e?.result, e?.learning].filter(Boolean).map(esc).join("<br>")}</p>`).join("<br>")}</section>` : ""}<details class="paper-section"><summary>전체 원문 보기</summary><pre class="archive-raw">${esc(JSON.stringify(note, null, 2))}</pre></details>`;
+        }
+        function showLegacyNote(key, index) {
+          const source = legacyRecords().sources.find((x) => x.key === key),
+            n = source?.notes[index];
+          if (n === undefined) {
+            toast("이전 기록을 찾지 못했어요. 보관함을 다시 열어 주세요.");
+            return;
+          }
+          view = "legacy-note";
+          openSheet(
+            "AN EARLIER THOUGHT / ORIGINAL RECORD",
+            "다시 꺼내 본 생각.",
+            `${archiveText(n)}<div class="actions"><button class="btn ghost" data-action="legacy">이전 기록 목록</button><button class="btn" data-action="legacy-sail" data-source="${key}" data-index="${index}">이 생각으로 새 배 띄우기 ↗</button></div><p class="sub">새 항해에는 전체 원문의 사본을 함께 보관해요. 원래 기록과 실험은 변경하지 않아요.</p>`,
+          );
+        }
+        function importLegacy(key, index) {
+          const source = legacyRecords().sources.find((x) => x.key === key),
+            n = source?.notes[index];
+          if (!n || typeof n !== "object") {
+            toast("이 기록은 원문 백업으로 보관해 주세요.");
+            return;
+          }
+          const sourceId = String(n.id ?? index),
+            existing = state.voyages.find(
+              (v) =>
+                v.legacy?.sourceKey === key && v.legacy?.sourceId === sourceId,
+            );
+          if (existing) {
+            if (save(() => (state.activeId = existing.id))) {
+              syncWorld();
+              start();
+              toast("이미 이어가고 있는 항해를 열었어요.");
+            }
+            return;
+          }
+          if (state.voyages.length >= 100) {
+            toast("항해가 100개예요. 백업 후 쓰지 않는 항해를 정리해 주세요.");
+            return;
+          }
+          const f = n.fields && typeof n.fields === "object" ? n.fields : {},
+            v = {
+              id: id(),
+              entryPoint: null,
+              idea: String(n.body ?? n.text ?? n.content ?? n.title ?? ""),
+              fields: {
+                problem: String(f.problem || ""),
+                audience: String(f.who || f.audience || ""),
+                change: "",
+                solution: String(f.solution || f.proposal || ""),
+                difference: String(f.difference || f.edge || ""),
+                plan: "",
+                validation: "",
+              },
+              step: 0,
+              created: Date.now(),
+              updated: Date.now(),
+              goal: null,
+              lighthouse: null,
+              crew: [],
+              fromCity: null,
+              legacy: {
+                sourceKey: key,
+                sourceId,
+                note: JSON.parse(JSON.stringify(n)),
+              },
+            };
+          if (
+            save(() => {
+              state.voyages.push(v);
+              state.activeId = v.id;
+            })
+          ) {
+            syncWorld();
+            showChart();
+          }
+        }
+        function showVoyageArchive() {
+          const legacy = current()?.legacy;
+          if (!legacy) return;
+          openSheet(
+            "PRESERVED RECORD / READ ONLY",
+            "이 배에 함께 실은\n이전 기록.",
+            `${archiveText(legacy.note)}<button class="btn ghost" data-action="chart">항해지도로 돌아가기</button>`,
+          );
+        }
+        function backupLegacy() {
+          const sources = {};
+          try {
+            for (const key of legacyKeys) {
+              const value = localStorage.getItem(key);
+              if (value !== null) sources[key] = value;
+            }
+          } catch {
+            toast("이 브라우저의 이전 저장소에 접근하지 못했어요.");
+            return;
+          }
+          const data = JSON.stringify(
+              {
+                app: "moru-previous-records",
+                version: 1,
+                sources,
+                exportedAt: new Date().toISOString(),
+              },
+              null,
+              2,
+            ),
+            url = URL.createObjectURL(
+              new Blob([data], { type: "application/json" }),
+            ),
+            a = document.createElement("a");
+          a.href = url;
+          a.download = "moru-previous-records.json";
+          document.body.append(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 3000);
+          toast("이전 데이터의 원문을 백업했어요. 원본은 변경하지 않았어요.");
+        }
+
+        resize();
+        syncWorld();
+        startAnimation();
+      })();
+    </script>
+  </body>
+</html>
